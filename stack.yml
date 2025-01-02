@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  adapter:
+    build:
+      context: .
+      dockerfile: ./adapter/Dockerfile
+    image: adapter
+    depends_on:
+      - tsdb
+      - mqtt-broker
+    environment:
+      DEBUG_DATA_FLOW: "true"
+      DOCKER_INFLUXDB_INIT_ORG: my_org
+      DOCKER_INFLUXDB_INIT_BUCKET: my_bucket
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: my_token
+    networks:
+      - tsdb-network
+      - adapter-network
+    restart: always
+
+  mqtt-broker:
+    image: eclipse-mosquitto:latest
+    ports:
+      - 1883:1883
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    networks:
+      - adapter-network
+
+  tsdb:
+    image: influxdb:2.7
+    ports:
+      - 8086:8086
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: bogdi
+      DOCKER_INFLUXDB_INIT_PASSWORD: parola123
+      DOCKER_INFLUXDB_INIT_ORG: my_org
+      DOCKER_INFLUXDB_INIT_BUCKET: my_bucket
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: my_token
+    volumes:
+      - tsdb-volume:/var/lib/influxdb2
+    networks:
+      - tsdb-network
+      - data-network
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - tsdb
+    ports:
+      - 80:3000
+    environment:
+      GF_SECURITY_ADMIN_USER: asistent
+      GF_SECURITY_ADMIN_PASSWORD: grafanaSCD2024
+    volumes:
+      - grafana-volume:/var/lib/grafana
+    networks:
+      - data-network
+    restart: always
+
+volumes:
+  tsdb-volume:
+  grafana-volume:
+
+networks:
+  adapter-network:
+  tsdb-network: 
+  data-network:
