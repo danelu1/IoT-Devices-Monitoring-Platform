@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export SCD_DVP=/var/lib
+
 SWARM_STATE=$(docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null)
 
 if [ "$SWARM_STATE" != "active" ]; then

@@ -40,7 +40,7 @@ services:
       DOCKER_INFLUXDB_INIT_BUCKET: my_bucket
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: my_token
     volumes:
-      - tsdb-volume:/var/lib/influxdb2
+      - tsdb-volume:${SCD_DVP}/influxdb2
     networks:
       - tsdb-network
       - data-network
@@ -55,7 +55,10 @@ services:
       GF_SECURITY_ADMIN_USER: asistent
       GF_SECURITY_ADMIN_PASSWORD: grafanaSCD2024
     volumes:
-      - grafana-volume:/var/lib/grafana
+      - grafana-volume:${SCD_DVP}/grafana
+      - ./provisioning:/etc/grafana/provisioning
+      - ./provisioning/dashboards:/var/lib/grafana/dashboards
+      - ./provisioning/datasources:/var/lib/grafana/datasources
     networks:
       - data-network
     restart: always

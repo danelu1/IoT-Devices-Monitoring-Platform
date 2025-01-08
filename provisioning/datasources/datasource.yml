@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    url: http://tsdb:8086
+    isDefault: true
+    database: my_bucket
+    user: bogdi
+    password: parola123
+    jsonData:
+      organization: my_org
+      defaultBucket: my_bucket
+      version: Flux
+    secureJsonData:
+      token: my_token

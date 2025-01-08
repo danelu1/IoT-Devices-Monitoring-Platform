@@ -1,0 +1,221 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 2,
+        "showHeader": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "query": "current = from(bucket: \"my_bucket\")\r\n  |> range(start: -2d)\r\n  |> filter(fn: (r) => (r[\"station\"] == \"RPi_1\" or r[\"station\"] == \"RPi_2\" or r[\"station\"] == \"RPi_3\" or r[\"station\"] == \"RPi_4\") and r[\"_field\"] == \"BAT\")\r\n  |> group(columns: [\"station\"])\r\n  |> last()\r\n  |> map(fn: (r) => ({ r with _value: float(v: r._value), newValue: \"current\" }))\r\n\r\nmin = from(bucket: \"my_bucket\")\r\n  |> range(start: -2d)\r\n  |> filter(fn: (r) => (r[\"station\"] == \"RPi_1\" or r[\"station\"] == \"RPi_2\" or r[\"station\"] == \"RPi_3\" or r[\"station\"] == \"RPi_4\") and r[\"_field\"] == \"BAT\")\r\n  |> group(columns: [\"station\"])\r\n  |> min()\r\n  |> map(fn: (r) => ({ r with _value: float(v: r._value), newValue: \"min\" }))\r\n\r\nmax = from(bucket: \"my_bucket\")\r\n  |> range(start: -2d)\r\n  |> filter(fn: (r) => (r[\"station\"] == \"RPi_1\" or r[\"station\"] == \"RPi_2\" or r[\"station\"] == \"RPi_3\" or r[\"station\"] == \"RPi_4\") and r[\"_field\"] == \"BAT\")\r\n  |> group(columns: [\"station\"])\r\n  |> max()\r\n  |> map(fn: (r) => ({ r with _value: float(v: r._value), newValue: \"max\" }))\r\n\r\nmean = from(bucket: \"my_bucket\")\r\n  |> range(start: -2d)\r\n  |> filter(fn: (r) => (r[\"station\"] == \"RPi_1\" or r[\"station\"] == \"RPi_2\" or r[\"station\"] == \"RPi_3\" or r[\"station\"] == \"RPi_4\") and r[\"_field\"] == \"BAT\")\r\n  |> group(columns: [\"station\"])\r\n  |> mean()\r\n  |> map(fn: (r) => ({ r with _value: float(v: r._value), newValue: \"mean\" }))\r\n\r\nunion(tables: [current, min, max, mean])\r\n  |> group(columns: [\"station\"])\r\n  |> pivot(rowKey: [\"station\"], columnKey: [\"newValue\"], valueColumn: \"_value\")\r\n  |> group()\r\n  |> yield(name: \"statistics\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Battery Table",
+      "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "station"
+              }
+            ]
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"my_bucket\")\r\n  |> range(start: -2d)\r\n  |> filter(fn: (r) => r[\"station\"] == \"RPi_1\" or r[\"station\"] == \"RPi_2\" or r[\"station\"] == \"RPi_3\" or r[\"station\"] == \"RPi_4\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"BAT\")\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Battery Graph",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*)\\s(.*)}$",
+            "renamePattern": "$2"
+          }
+        }
+      ],
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "30m",
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-2d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Battery Dashboard",
+  "uid": "ee979ruiyn18gf",
+  "version": 4,
+  "weekStart": ""
+}
